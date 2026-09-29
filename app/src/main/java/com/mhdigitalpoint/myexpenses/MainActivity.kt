@@ -198,7 +198,7 @@ class MainActivity : ComponentActivity() {
 
     private fun ledgerCsv(): String = buildString {
         append("Date,Category,Note,Receive,Expense,Balance\r\n")
-        ledger().forEach { append(csv(it.date)).append(',').append(csv(it.category)).append(',').append(csv(it.note)).append(',').append(it.receive ?: "").append(',').append(it.expense ?: "").append(',').append(it.balance).append("\r\n") }
+        ledger().forEach { append(csv(it.date)).append(',').append(csv(it.category)).append(',').append(csv(it.note)).append(',').append(it.receive ?: "").append(',').append(it.expense ?: "").append(',').append(it.balance).append('\n') }
     }
 
     private fun csv(s: String) = if (s.contains(',') || s.contains('"') || s.contains('\n')) "\"${s.replace("\"", "\"\"")}\"" else s
@@ -247,22 +247,32 @@ class MainActivity : ComponentActivity() {
         val pm = getSystemService(PRINT_SERVICE) as PrintManager
         pm.print(title, object : PrintDocumentAdapter() {
             override fun onLayout(
-                oldAttributes: PrintAttributes?,
-                newAttributes: PrintAttributes?,
+                oldAttributes: PrintAttributes,
+                newAttributes: PrintAttributes,
                 cancellationSignal: CancellationSignal?,
-                callback: PrintDocumentAdapter.LayoutResultCallback?
+                callback: LayoutResultCallback,
+                extras: Bundle?
             ) {
-                if (cancellationSignal?.isCanceled == true) { callback?.onLayoutCancelled(); return }
-                callback?.onLayoutFinished(PrintDocumentInfo.Builder("document").setPageCount(1).build(), true)
+                if (cancellationSignal?.isCanceled == true) {
+                    callback.onLayoutCancelled()
+                    return
+                }
+                callback.onLayoutFinished(
+                    PrintDocumentInfo.Builder("document").setPageCount(1).build(),
+                    true
+                )
             }
 
             override fun onWrite(
                 pages: Array<PrintAttributes.PageRange>,
                 destination: ParcelFileDescriptor,
                 cancellationSignal: CancellationSignal?,
-                callback: PrintDocumentAdapter.WriteResultCallback
+                callback: WriteResultCallback
             ) {
-                if (cancellationSignal?.isCanceled == true) { callback.onWriteCancelled(); return }
+                if (cancellationSignal?.isCanceled == true) {
+                    callback.onWriteCancelled()
+                    return
+                }
                 try {
                     val out = ParcelFileDescriptor.AutoCloseOutputStream(destination)
                     out.write(text.toByteArray())
@@ -272,7 +282,7 @@ class MainActivity : ComponentActivity() {
                     callback.onWriteFailed(e.message)
                 }
             }
-        })
+        }, null)
     }
 
     private fun exportSummary() { saveFile("summary") }
