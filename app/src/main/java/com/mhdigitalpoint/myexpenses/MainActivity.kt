@@ -250,27 +250,26 @@ class MainActivity : ComponentActivity() {
                 oldAttributes: PrintAttributes?,
                 newAttributes: PrintAttributes?,
                 cancellationSignal: CancellationSignal?,
-                callback: PrintDocumentAdapter.LayoutResultCallback?,
-                extras: Bundle?
+                callback: PrintDocumentAdapter.LayoutResultCallback?
             ) {
                 if (cancellationSignal?.isCanceled == true) { callback?.onLayoutCancelled(); return }
                 callback?.onLayoutFinished(PrintDocumentInfo.Builder("document").setPageCount(1).build(), true)
             }
 
             override fun onWrite(
-                pages: Array<PrintAttributes.PageRange>?,
-                destination: ParcelFileDescriptor?,
+                pages: Array<PrintAttributes.PageRange>,
+                destination: ParcelFileDescriptor,
                 cancellationSignal: CancellationSignal?,
-                callback: PrintDocumentAdapter.WriteResultCallback?
+                callback: PrintDocumentAdapter.WriteResultCallback
             ) {
-                if (cancellationSignal?.isCanceled == true) { callback?.onWriteCancelled(); return }
+                if (cancellationSignal?.isCanceled == true) { callback.onWriteCancelled(); return }
                 try {
                     val out = ParcelFileDescriptor.AutoCloseOutputStream(destination)
                     out.write(text.toByteArray())
                     out.close()
-                    callback?.onWriteFinished(arrayOf(PrintAttributes.PageRange.ALL_PAGES))
+                    callback.onWriteFinished(arrayOf(PrintAttributes.PageRange.ALL_PAGES))
                 } catch (e: Exception) {
-                    callback?.onWriteFailed(e.message)
+                    callback.onWriteFailed(e.message)
                 }
             }
         })
