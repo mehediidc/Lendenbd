@@ -246,13 +246,24 @@ class MainActivity : ComponentActivity() {
     private fun printText(title: String, text: String) {
         val pm = getSystemService(PRINT_SERVICE) as PrintManager
         pm.print(title, object : PrintDocumentAdapter() {
-            override fun onLayout(old: PrintAttributes?, new: PrintAttributes?, cancellation: CancellationSignal?, callback: LayoutResultCallback?, extras: Bundle?) {
-                if (cancellation?.isCanceled == true) { callback?.onLayoutCancelled(); return }
+            override fun onLayout(
+                oldAttributes: PrintAttributes?,
+                newAttributes: PrintAttributes?,
+                cancellationSignal: CancellationSignal?,
+                callback: PrintDocumentAdapter.LayoutResultCallback?,
+                extras: Bundle?
+            ) {
+                if (cancellationSignal?.isCanceled == true) { callback?.onLayoutCancelled(); return }
                 callback?.onLayoutFinished(PrintDocumentInfo.Builder("document").setPageCount(1).build(), true)
             }
 
-            override fun onWrite(pages: Array<PrintAttributes.PageRange>?, destination: ParcelFileDescriptor?, cancellation: CancellationSignal?, callback: WriteResultCallback?) {
-                if (cancellation?.isCanceled == true) { callback?.onWriteCancelled(); return }
+            override fun onWrite(
+                pages: Array<PrintAttributes.PageRange>?,
+                destination: ParcelFileDescriptor?,
+                cancellationSignal: CancellationSignal?,
+                callback: PrintDocumentAdapter.WriteResultCallback?
+            ) {
+                if (cancellationSignal?.isCanceled == true) { callback?.onWriteCancelled(); return }
                 try {
                     val out = ParcelFileDescriptor.AutoCloseOutputStream(destination)
                     out.write(text.toByteArray())
@@ -329,8 +340,8 @@ private fun EntryScreen(db: DB, dark: Boolean, onChange: () -> Unit) {
         OutlinedTextField(date, { date = it }, label = { Text("Date (YYYY-MM-DD)") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(note, { note = it }, label = { Text("Note") }, modifier = Modifier.fillMaxWidth())
         Row {
-            Button(onClick = { type = "income"; }, Modifier.weight(1f)) { Text("Income") }
-            Button(onClick = { type = "expense"; }, Modifier.weight(1f)) { Text("Expense") }
+            Button(onClick = { type = "income" }, Modifier.weight(1f)) { Text("Income") }
+            Button(onClick = { type = "expense" }, Modifier.weight(1f)) { Text("Expense") }
         }
         Button(onClick = {
             if (amount.isNotBlank() && category.isNotBlank()) {
@@ -357,7 +368,6 @@ private fun SummaryMini(label: String, v: Double) {
 @Composable
 private fun HistoryScreen(db: DB, onChange: () -> Unit) {
     var edit by remember { mutableStateOf<Entry?>(null) }
-    var tick by remember { mutableIntStateOf(0) }
     val rows = db.all()
 
     if (edit != null) {
