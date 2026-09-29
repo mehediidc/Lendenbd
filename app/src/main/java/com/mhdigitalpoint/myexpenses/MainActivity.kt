@@ -356,8 +356,8 @@ private fun EntryScreen(db: DB, dark: Boolean, onChange: () -> Unit) {
 }
 
 @Composable
-private fun SummaryMini(label: String, v: Double) {
-    Card(Modifier.weight(1f)) {
+private fun SummaryMini(label: String, v: Double, modifier: Modifier = Modifier) {
+    Card(modifier) {
         Column(Modifier.padding(9.dp)) {
             Text(label, fontSize = 10.sp)
             Text("৳${String.format(Locale.US, "%,.2f", v)}", fontWeight = FontWeight.Bold, fontSize = 13.sp)
